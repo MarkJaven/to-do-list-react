@@ -1,59 +1,33 @@
-import { useState } from "react";
+// src/App.js
+import React from "react";
+import { Routes, Route, Navigate } from "react-router-dom";
 
-function App() {
-  const [tasks, setTasks] = useState([]);
-  const [input, setInput] = useState("");
+import SignUp from "./components/SignUp";
+import Login from "./components/Login";
+import VerifyEmail from "./components/VerifyEmail";
+import ProtectedRoute from "./components/ProtectedRoute";
+import ToDoPage from "./components/ToDoPage";
 
-  const handleAddTask = () => {
-    if (input.trim() !== "") {
-      setTasks([...tasks, { text: input, completed: false }]);
-      setInput("");
-    }
-  };
-
-  const toggleComplete = (index) => {
-    const updatedTasks = [...tasks];
-    updatedTasks[index].completed = !updatedTasks[index].completed;
-    setTasks(updatedTasks);
-  };
-
+export default function App() {
   return (
-    <div className="min-h-screen bg-gray-100 p-6 flex justify-center">
-      <div className="w-full max-w-md bg-white rounded-lg shadow-md p-6">
-        <h1 className="text-2xl font-bold text-center mb-4">To-Do List</h1>
+    <Routes>
+      {/* Public routes */}
+      <Route path="/signup" element={<SignUp />} />
+      <Route path="/login" element={<Login />} />
+      <Route path="/verify-email" element={<VerifyEmail />} />
 
-        <div className="flex mb-4">
-          <input
-            type="text"
-            className="flex-grow p-2 border rounded-l-md focus:outline-none"
-            value={input}
-            onChange={(e) => setInput(e.target.value)}
-            placeholder="Add a task..."
-          />
-          <button
-            onClick={handleAddTask}
-            className="bg-blue-500 text-white px-4 py-2 rounded-r-md hover:bg-blue-600"
-          >
-            Add
-          </button>
-        </div>
+      {/* Protected home: only authenticated & verified */}
+      <Route
+        path="/"
+        element={
+          <ProtectedRoute requireEmailVerified={true}>
+            <ToDoPage />
+          </ProtectedRoute>
+        }
+      />
 
-        <ul>
-          {tasks.map((task, index) => (
-            <li
-              key={index}
-              onClick={() => toggleComplete(index)}
-              className={`p-2 cursor-pointer border-b ${
-                task.completed ? "line-through text-gray-400" : ""
-              }`}
-            >
-              {task.text}
-            </li>
-          ))}
-        </ul>
-      </div>
-    </div>
+      {/* Fallback: redirect everything else to “/” */}
+      <Route path="*" element={<Navigate to="/" replace />} />
+    </Routes>
   );
 }
-
-export default App;
